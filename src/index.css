@@ -1,0 +1,16 @@
+/* ==== Google Fonts ==== */
+/* Lora and Rubik */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+/* ==== Tailwind CSS ==== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==== Custom CSS ==== */
+@layer components {
+  .link {
+    @apply text-sky-500 underline font-semibold;
+  }
+
+}
