@@ -2,9 +2,9 @@ import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndP
 import { createContext, useEffect, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import firebaseAuth from "../firebase/firebase.auth";
-import { authT } from "../@types/auth";
+import { AuthType } from "../@types/auth";
 
-export const AuthContext = createContext<authT | undefined>(undefined);
+export const AuthContext = createContext<AuthType | undefined>(undefined);
 
 const AuthProvider = ({
   children
@@ -16,7 +16,7 @@ const AuthProvider = ({
   const [user, setUser] = useState<User>();
 
   // Login user
-  const login: authT['login'] = async (email, password) => {
+  const login: AuthType['login'] = async (email, password) => {
     try {
       const res = await signInWithEmailAndPassword(firebaseAuth, email, password);
       setUser(res.user);
@@ -37,7 +37,7 @@ const AuthProvider = ({
   }
 
   // Create a account -> sign up or register
-  const register: authT['register'] = async ({ name, email, password }) => {
+  const register: AuthType['register'] = async ({ name, email, password }) => {
     try {
       const res = await createUserWithEmailAndPassword(firebaseAuth, email, password);
       await updateProfile(res.user, {
@@ -61,7 +61,7 @@ const AuthProvider = ({
   }
 
   // Logout
-  const logout: authT['logout'] = async () => {
+  const logout: AuthType['logout'] = async () => {
     setPageLoading(true);
     await signOut(firebaseAuth);
     setUser(undefined);
@@ -80,7 +80,7 @@ const AuthProvider = ({
   }, [])
 
 
-  const auth: authT = {
+  const auth: AuthType = {
     user,
     pageLoading,
     login,

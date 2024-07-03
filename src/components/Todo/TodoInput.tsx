@@ -1,12 +1,22 @@
 import clsx from "clsx";
-import { useState } from "react"
-import { FaRegCircle, FaTrash } from "react-icons/fa"
-// import { FaRegCircleCheck } from "react-icons/fa6"
+import { useState } from "react";
+import useTodoStore from "../../stores/useTodoStore";
 
-const TodoInput = ({ inputID }: { inputID: string }) => {
+const TodoInput = (
+  {
+    inputID,
+    done,
+    changeInput,
+    setChangeInput
+  }: {
+    inputID: string,
+    done: boolean,
+    changeInput: boolean,
+    setChangeInput: React.Dispatch<React.SetStateAction<boolean>>
+  }) => {
 
-  const [changeInput, setChangeInput] = useState(false);
   const [todo, setTodo] = useState('');
+  const deleteTodo = useTodoStore(state => state.deleteTodo);
 
   const formSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -15,38 +25,37 @@ const TodoInput = ({ inputID }: { inputID: string }) => {
     setChangeInput(true);
   }
 
+  // Remove empty todo
+  const blurHandler = (event: React.BaseSyntheticEvent) => {
+    if (event.target.value !== '') {
+      !done && setChangeInput(true);
+      return;
+    }
+    deleteTodo(inputID);
+  }
+
   return (
-    <div className={clsx(
-      "flex justify-between items-center gap-3 mb-2 border p-3 rounded-md",
-      { "border-orange-500": !changeInput }
-    )}>
-      <div className="flex justify-center items-center">
-        <button className="text-neutral-500">
-          <FaRegCircle className="size-6" />
-          {/* <FaRegCircleCheck className="size-6" /> */}
-        </button>
-      </div>
-      <div className="w-full">
-        <form onSubmit={formSubmit}>
-          <input
-            id={`todo-input-${inputID}`}
-            type="text"
-            placeholder="Write your todo"
-            className="border-s-2 border-e-2 px-2 w-full rounded-sm outline-none"
-            name="todo"
-            defaultValue={todo}
-            onBlur={() => setChangeInput(true)}
-            onClick={() => setChangeInput(false)}
-            readOnly={changeInput}
-          />
-          <input type="submit" hidden />
-        </form>
-      </div>
-      <div>
-        <button className="w-fit bg-red-500 text-white p-2 rounded-md">
-          <FaTrash className="size-6" />
-        </button>
-      </div>
+    <div className="w-full border-s-2 border-e-2 p-2 ">
+      <form onSubmit={formSubmit} className="flex items-center gap-2">
+        <input
+          id={`todo-input-${inputID}`}
+          type="text"
+          placeholder="Write your todo"
+          className={clsx(
+            "px-2 w-full rounded-sm outline-none",
+            {
+              "line-through text-neutral-400": done
+            }
+          )}
+          name="todo"
+          defaultValue={todo}
+          onBlur={blurHandler}
+          onClick={() => !done && setChangeInput(false)}
+          readOnly={changeInput}
+        />
+        <p className="text-sm text-neutral-400 outline-none w-24">60 minutes ago</p>
+        <input type="submit" hidden />
+      </form>
     </div>
   )
 }
