@@ -12,8 +12,8 @@ const Navbar = () => {
   const { user } = useAuthContext();
 
   return (
-    <nav className="p-2 flex justify-between items-center">
-      <BrandName />
+    <nav className="p-2 flex justify-between items-center mb-10">
+      <BrandName noLink={(location.pathname === links.home)} />
       <div>
         {/* <div className="text-2xl">
           <FaSun />
