@@ -6,6 +6,7 @@ import PasswordInputField from "./PasswordInputField";
 import Button from "../ui/Button";
 import { links } from "../../constants";
 import { registrationSchema } from "../../schema/registrationSchema";
+import axiosFetch from "../../utils/axiosFetch";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -28,8 +29,8 @@ const RegisterForm = () => {
     const rawData = {
       name,
       email,
-      password
-    }
+      password,
+    };
 
     const validation = await registrationSchema.safeParseAsync(rawData);
     if (!validation.success) {
@@ -44,16 +45,25 @@ const RegisterForm = () => {
       return;
     }
 
+    // Create a cookie
+    const axiosRes = await axiosFetch("/auth", {
+      method: "POST",
+      data: { email },
+    });
+    if (!axiosRes.data.success) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(false);
     form.reset();
     navigate(links.home);
-  }
+  };
 
   // Change button style and stop from submitting invalid form
   const registerButtonHandler = (value: boolean) => {
     setValidationSuccess(value);
-  }
-
+  };
 
   return (
     <>
@@ -63,7 +73,9 @@ const RegisterForm = () => {
       >
         <h1 className="text-3xl text-sky-500 font-semibold mb-4">Register</h1>
         <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="text-neutral-400 text-sm">Full Name</label>
+          <label htmlFor="name" className="text-neutral-400 text-sm">
+            Full Name
+          </label>
           <input
             type="text"
             placeholder="Flint Lockwood"
@@ -71,34 +83,45 @@ const RegisterForm = () => {
             className="border p-3 rounded-md"
             onChange={(event) => {
               if (event.currentTarget.value.length < 3) setNameError(false);
-              else setNameError(true)
+              else setNameError(true);
             }}
             required
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="text-neutral-400 text-sm">Email</label>
-          <input type="email" placeholder="example@domain.com" name="email" className="border p-3 rounded-md" required />
+          <label htmlFor="email" className="text-neutral-400 text-sm">
+            Email
+          </label>
+          <input
+            type="email"
+            placeholder="example@domain.com"
+            name="email"
+            className="border p-3 rounded-md"
+            required
+          />
         </div>
         <div>
           <PasswordInputField registerButtonHandler={registerButtonHandler} />
         </div>
-        {
-          !loading ? (
-            <Button
-              type="submit"
-              variant="primary"
-              label="Register"
-              disable={!(validationSuccess && nameError)}
-            />
-          ) : (
-            <Button variant="loading" />
-          )
-        }
-        <p className="text-neutral-500 mt-6">Already have an account? <Link to={links.login} className="link">Login</Link></p>
+        {!loading ? (
+          <Button
+            type="submit"
+            variant="primary"
+            label="Register"
+            disable={!(validationSuccess && nameError)}
+          />
+        ) : (
+          <Button variant="loading" />
+        )}
+        <p className="text-neutral-500 mt-6">
+          Already have an account?{" "}
+          <Link to={links.login} className="link">
+            Login
+          </Link>
+        </p>
       </form>
     </>
-  )
-}
+  );
+};
 
-export default RegisterForm
+export default RegisterForm;

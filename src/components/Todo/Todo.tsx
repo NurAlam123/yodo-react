@@ -1,34 +1,65 @@
 import clsx from "clsx";
-import { FaRegCircle, FaTrash } from "react-icons/fa"
+import { FaRegCircle, FaTrash } from "react-icons/fa";
 import TodoInput from "./TodoInput";
 import { useState } from "react";
-import useTodoStore from "../../stores/useTodoStore";
-import { FaRegCircleCheck } from "react-icons/fa6"
+import { FaRegCircleCheck } from "react-icons/fa6";
+import axiosFetch from "../../utils/axiosFetch";
 
-const Todo = ({ inputID }: { inputID: string }) => {
+const Todo = ({
+  inputID,
+  todoData,
+  deleteEmptyTodo,
+  deleteTodo,
+  readonly = false,
+  checked = false,
+}: {
+  inputID: string;
+  todoData?: Todo;
+  deleteEmptyTodo?: () => void;
+  deleteTodo: (inputID: string) => void;
+  readonly?: boolean;
+  checked?: boolean;
+}) => {
+  const [changeInput, setChangeInput] = useState(readonly);
+  const [done, setDone] = useState(checked);
 
-  const [changeInput, setChangeInput] = useState(false);
-  const [done, setDone] = useState(false);
-
-  const deleteTodo = useTodoStore(state => state.deleteTodo);
+  const checkTodo = async () => {
+    setDone(!done);
+    await axiosFetch("/api/todo", {
+      method: "PATCH",
+      data: { id: inputID, done: !done },
+    });
+  };
 
   return (
-    <div className={clsx(
-      "flex justify-between items-center gap-3 mb-2 border p-3 rounded-md",
-      {
-        "border-orange-500": !changeInput
-      }
-    )}>
+    <div
+      className={clsx(
+        "flex justify-between items-center gap-3 mb-2 border p-3 rounded-md",
+        {
+          "border-orange-500": !changeInput,
+        }
+      )}
+    >
       <div className="flex justify-center items-center">
         <button className="text-neutral-500">
-          {
-            done ?
-              <FaRegCircleCheck className="size-6 text-green-500" onClick={() => setDone(!done)} /> :
-              <FaRegCircle className="size-6" onClick={() => setDone(!done)} />
-          }
+          {done ? (
+            <FaRegCircleCheck
+              className="size-6 text-green-500"
+              onClick={checkTodo}
+            />
+          ) : (
+            <FaRegCircle className="size-6" onClick={checkTodo} />
+          )}
         </button>
       </div>
-      <TodoInput inputID={inputID} changeInput={changeInput} setChangeInput={setChangeInput} done={done} />
+      <TodoInput
+        inputID={inputID}
+        content={todoData?.content || ""}
+        done={todoData?.done || done}
+        changeInput={changeInput}
+        setChangeInput={setChangeInput}
+        deleteEmptyTodo={deleteEmptyTodo ? deleteEmptyTodo : () => {}}
+      />
       <div>
         <button
           className="w-fit bg-red-500 hover:bg-red-600 text-white p-2 rounded-md"
@@ -38,7 +69,7 @@ const Todo = ({ inputID }: { inputID: string }) => {
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Todo
+export default Todo;

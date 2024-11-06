@@ -1,30 +1,50 @@
-import { useEffect, useState } from "react"
-import TodoAddButton from "../components/ui/TodoAddButton"
+import { useEffect, useState } from "react";
+import TodoAddButton from "../components/ui/TodoAddButton";
 import Todo from "../components/Todo/Todo";
-import useTodoStore from "../stores/useTodoStore";
-import { TodoBoxType } from "../@types/stores";
-
+import axiosFetch from "../utils/axiosFetch";
+import setAllTodo from "../utils/setAllTodo";
 
 const Home = () => {
-  const [uniqueKey, setUniqueKey] = useState(0);
+  const [todoBox, setTodoBox] = useState<TodoBoxType[]>([]);
 
-  const todoBox = useTodoStore(state => state.todoBox);
-  const addTodo = useTodoStore(state => state.addTodo);
-
+  // Add a todo
   const addTodoButton = () => {
-    const uid = uniqueKey.toString();
-    const newTodo: TodoBoxType = {
-      id: uid,
-      element: <Todo inputID={uid} key={uid} />
+    const uuid = crypto.randomUUID();
+    const todo: React.ReactNode = (
+      <Todo
+        key={uuid}
+        inputID={uuid}
+        deleteEmptyTodo={deleteEmptyTodo}
+        deleteTodo={deleteTodo}
+      />
+    );
+    const newTodo = {
+      id: uuid,
+      element: todo,
     };
-    addTodo(newTodo);
-    setUniqueKey(prevKey => prevKey + 1);
-  }
+    setTodoBox([newTodo, ...todoBox]);
+  };
 
-  // Focus the latest input box
+  // Delete an empty todo
+  const deleteEmptyTodo = () => {
+    setTodoBox([...todoBox]);
+  };
+
+  // Delete a todo
+  const deleteTodo = async (inputID: string) => {
+    await axiosFetch("/api/todo", { method: "DELETE", data: { id: inputID } });
+    const todo = await setAllTodo(deleteTodo);
+    setTodoBox(todo);
+  };
+
+  // Fetch all todo from database
   useEffect(() => {
-    document.getElementById(`todo-input-${uniqueKey - 1}`)?.focus();
-  }, [uniqueKey])
+    const fetchData = async () => {
+      const todo = await setAllTodo(deleteTodo);
+      setTodoBox(todo);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="m-10">
@@ -34,18 +54,14 @@ const Home = () => {
       </div>
       <hr className="mb-4 rounded-full" />
       <div>
-        {
-          todoBox.length < 1 ? (
-            <p className="text-neutral-400">You haven't added any todo yet.</p>
-          ) : (
-            <div>
-              {todoBox.map(todo => todo.element)}
-            </div>
-          )
-        }
+        {todoBox.length < 1 ? (
+          <p className="text-neutral-400">You haven't added any todo yet.</p>
+        ) : (
+          <div>{todoBox.map((todo) => todo.element)}</div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

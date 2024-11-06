@@ -1,8 +1,14 @@
 // @types todo
 
 interface Todo {
-  _id: string,
-  todo: string,
-  date: Date,
-  done: boolean
+  id: string;
+  email: string;
+  content: string;
+  createdAt: number;
+  done: boolean;
 }
+
+type TodoBoxType = {
+  id: string;
+  element: React.ReactNode;
+};
